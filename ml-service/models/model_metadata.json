@@ -1,0 +1,35 @@
+{
+  "model_type": "random_forest",
+  "accuracy": 0.812,
+  "f1_score": 0.811074477869621,
+  "train_samples": 8000,
+  "test_samples": 2000,
+  "features": [
+    "hour",
+    "day_of_week",
+    "month",
+    "weekend",
+    "holiday",
+    "temperature",
+    "rainfall",
+    "road_capacity",
+    "average_speed",
+    "vehicle_count",
+    "historical_vehicle_count",
+    "accident",
+    "construction",
+    "event",
+    "nearby_incidents",
+    "weather_condition",
+    "road_type"
+  ],
+  "target_classes": {
+    "0": "Low",
+    "1": "Moderate",
+    "2": "High",
+    "3": "Severe"
+  },
+  "data_type": "synthetic",
+  "trained_at": "2026-08-25T15:12:02.768642",
+  "version": "1.0"
+}
