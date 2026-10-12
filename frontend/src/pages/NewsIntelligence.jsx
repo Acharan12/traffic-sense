@@ -464,6 +464,7 @@ const generateTodayLiveNews = (location = 'Vadodara') => {
           <IncidentOCRVerifier
             onIncidentVerified={() => fetchNews(true)}
             selectedArticle={selectedArticleForVerify}
+            location={location}
           />
         </div>
 

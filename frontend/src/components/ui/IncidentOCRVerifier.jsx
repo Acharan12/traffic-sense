@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Upload, FileText, CheckCircle2, AlertTriangle, XCircle,
   Loader2, Sparkles, Shield, Image as ImageIcon, MapPin,
-  RefreshCw, Check, ArrowRight, ShieldCheck, Zap, Navigation
+  RefreshCw, Check, ArrowRight, ShieldCheck, Zap, Navigation,
+  X, Trash2
 } from 'lucide-react';
 import { createWorker } from 'tesseract.js';
 import MapView from '../map/MapView';
 import API from '../../api/client';
 
-export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticle }) {
+export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticle, location = 'Vadodara' }) {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [ocrText, setOcrText] = useState('');
@@ -22,6 +24,21 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
   const [verificationResult, setVerificationResult] = useState(null);
   const [selectedRouteId, setSelectedRouteId] = useState(null);
   const [toast, setToast] = useState(null);
+
+  const handleRemoveImage = (e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    setImage(null);
+    setImagePreview(null);
+    setIsOcrProcessing(false);
+    setOcrStatus('');
+    setOcrProgress(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   // Automatically load and verify article when selected from News Feed
   useEffect(() => {
@@ -56,9 +73,21 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
     },
     {
       label: '🚨 Fake Viral Hoax Rumor',
-      title: 'Viral Bridge Collapse Rumor',
-      text: 'URGENT: ALL ROADS AND FLYOVERS IN GUJARAT COLLAPSED! Nuclear explosion on highway. Share before deleted to 10 groups or you will be trapped forever!!',
+      title: 'Vadodara Curfew Audio Rumor Busted',
+      text: '🚨 FAKE: WhatsApp Audio Claiming 48-Hour Highway Shutdown in Vadodara Busted\n\nDistrict Magistrate and Police Cyber Cell refuted viral social media rumors claiming total curfew on Chhani Circle as completely fake.',
       type: 'fake',
+    },
+    {
+      label: '🎉 Vadodara Navratri Notice',
+      title: 'Vadodara Navratri Notice',
+      text: 'Big decision of the police regarding Navratri and Dussehra in Vadodara. Heavy vehicles banned from 11th to 19th October till 2am.\n\nBy: Jignesh Parmar',
+      type: 'real',
+    },
+    {
+      label: '⚠️ Viral Unverified Claim',
+      title: 'Vadodara-Ahmedabad Accident Claim',
+      text: 'A viral message claims that the Vadodara-Ahmedabad Highway has been completely blocked near Nadiad following a massive accident involving 25 vehicles. The message further claims that all vehicles are prohibited from entering the highway for the next 12 hours and that commuters must avoid the route. No official confirmation or verified source is provided for these claims.',
+      type: 'unverified',
     },
   ];
 
@@ -107,16 +136,18 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
     setVerifying(true);
     setVerificationResult(null);
 
+    const activeCity = selectedArticle?.location || location || 'Vadodara';
+
     try {
       const res = await API.post(
         '/news/verify',
         {
           text,
           title: text.split('\n')[0].substring(0, 80),
+          location: activeCity,
         },
         { timeout: 30000 }
       );
-
 
       if (res.data?.success) {
         const data = res.data.data;
@@ -125,10 +156,10 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
           setSelectedRouteId(data.routes[0].id);
         }
 
-        // Show toast
+        // Show toast with proper type (green for verified, red for fake)
         setToast({
-          type: data.toastType || 'verified',
-          message: data.toastMessage || 'Fact-check analysis complete.',
+          type: data.toastType || (data.isReal ? 'verified' : 'fake'),
+          message: data.toastMessage || (data.isReal ? 'Fact-check analysis complete.' : 'Hoax report flagged.'),
         });
         setTimeout(() => setToast(null), 5000);
 
@@ -152,6 +183,9 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
     setOcrText(preset.text);
     setImagePreview(null);
     setImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     handleVerify(preset.text);
   };
 
@@ -174,11 +208,19 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
           className={`p-3 rounded text-xs flex items-center justify-between shadow-lg animate-fade-in ${
             toast.type === 'verified'
               ? 'bg-emerald-600 text-white'
+              : toast.type === 'warning'
+              ? 'bg-amber-600 text-white'
               : 'bg-red-600 text-white'
           }`}
         >
           <div className="flex items-center gap-2">
-            {toast.type === 'verified' ? <CheckCircle2 size={16} /> : <AlertTriangle size={16} />}
+            {toast.type === 'verified' ? (
+              <CheckCircle2 size={16} />
+            ) : toast.type === 'warning' ? (
+              <AlertTriangle size={16} />
+            ) : (
+              <XCircle size={16} />
+            )}
             <span className="font-medium">{toast.message}</span>
           </div>
           <button onClick={() => setToast(null)} className="opacity-70 hover:opacity-100 font-bold">
@@ -221,24 +263,61 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
       <div className="grid md:grid-cols-2 gap-4 items-start">
         {/* Left Box: Image Upload & OCR Preview */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-notion-heading block">
-            1. Upload Incident Image / Notice (OCR)
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-notion-heading block">
+              1. Upload Incident Image / Notice (OCR)
+            </label>
+            {imagePreview && (
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="text-[11px] text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium flex items-center gap-1 hover:underline transition-colors cursor-pointer"
+                title="Remove uploaded image"
+              >
+                <Trash2 size={11} />
+                <span>Remove image</span>
+              </button>
+            )}
+          </div>
           <div className="border-2 border-dashed border-notion-border hover:border-notion-subtle rounded p-4 text-center cursor-pointer bg-notion-sidebar transition-colors relative">
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
             />
             {imagePreview ? (
-              <div className="space-y-2">
-                <img
-                  src={imagePreview}
-                  alt="Uploaded clip"
-                  className="max-h-36 mx-auto rounded object-contain border border-notion-border"
-                />
-                <p className="text-[11px] text-notion-dim">Click or drop new image to replace</p>
+              <div className="space-y-2 relative">
+                <div className="relative inline-block mx-auto">
+                  <img
+                    src={imagePreview}
+                    alt="Uploaded clip"
+                    className="max-h-36 mx-auto rounded object-contain border border-notion-border shadow-xs"
+                  />
+                  {/* Small floating remove button on image corner */}
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute -top-2 -right-2 z-20 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 shadow-md transition-transform hover:scale-110 flex items-center justify-center cursor-pointer"
+                    title="Remove image"
+                    aria-label="Remove image"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-[11px]">
+                  <span className="text-notion-dim">Click or drop new image to replace</span>
+                  <span className="text-notion-dim">·</span>
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium z-20 relative cursor-pointer hover:underline flex items-center gap-1"
+                  >
+                    <X size={11} />
+                    <span>Remove</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-2 py-4">
@@ -311,19 +390,42 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
             </span>
             <span
               className={`notion-pill font-bold text-xs uppercase ${
-                verificationResult.isReal ? 'notion-pill-green' : 'notion-pill-red'
+                verificationResult.isReal
+                  ? 'notion-pill-green'
+                  : verificationResult.verdict === 'UNVERIFIED_RUMOR'
+                  ? 'notion-pill-yellow'
+                  : 'notion-pill-red'
               }`}
             >
-              {verificationResult.isReal ? '● VERIFIED REAL INCIDENT' : '● FAKE / HOAX REPORT'}
+              {verificationResult.isReal
+                ? '● VERIFIED REAL INCIDENT'
+                : verificationResult.verdict === 'UNVERIFIED_RUMOR'
+                ? '⚠️ UNVERIFIED VIRAL CLAIM'
+                : '● FAKE / HOAX REPORT'}
             </span>
           </div>
 
-          {/* If Fake */}
+          {/* If Fake or Unverified */}
           {!verificationResult.isReal ? (
-            <div className="notion-callout-red space-y-2">
+            <div
+              className={`${
+                verificationResult.verdict === 'UNVERIFIED_RUMOR'
+                  ? 'p-3 rounded-md border text-xs bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200'
+                  : 'notion-callout-red'
+              } space-y-2`}
+            >
               <div className="flex items-center gap-2 font-bold text-sm">
-                <XCircle size={18} />
-                <span>Hoax / Unreliable News Alert</span>
+                {verificationResult.verdict === 'UNVERIFIED_RUMOR' ? (
+                  <>
+                    <AlertTriangle size={18} className="text-amber-500 flex-shrink-0" />
+                    <span>Unverified Viral Claim / Social Media Rumor</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle size={18} className="text-red-500 flex-shrink-0" />
+                    <span>Hoax / Debunked News Alert</span>
+                  </>
+                )}
               </div>
               <p className="text-xs leading-relaxed opacity-90">
                 {verificationResult.explanation}
