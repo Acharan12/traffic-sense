@@ -26,30 +26,55 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-// CORS — allow any localhost port in development for flexibility
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
+// CORS — allow frontend origins
+const rawAllowed = process.env.ALLOWED_ORIGINS;
+const allowedOrigins = rawAllowed
+  ? rawAllowed.split(',').map((o) => o.trim().replace(/\/+$/, ''))
   : null;
+
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').trim().replace(/\/+$/, '');
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl, Postman, server-to-server)
+    // Allow requests with no origin (curl, Postman, server-to-server, Render health checks)
     if (!origin) return callback(null, true);
-    // In dev, allow all localhost
-    if (process.env.NODE_ENV !== 'production') {
-      if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+
+    const cleanOrigin = origin.trim().replace(/\/+$/, '');
+
+    // Allow all in development or if wildcard specified
+    if (process.env.ALLOWED_ORIGINS === '*' || process.env.NODE_ENV !== 'production') {
+      if (cleanOrigin.startsWith('http://localhost') || cleanOrigin.startsWith('http://127.0.0.1')) {
         return callback(null, true);
       }
     }
-    // Check explicit whitelist
-    const whitelist = allowedOrigins || [process.env.FRONTEND_URL || 'http://localhost:5173'];
-    if (whitelist.includes(origin)) return callback(null, true);
+
+    // Check explicit whitelist or configured FRONTEND_URL
+    const whitelist = allowedOrigins || [frontendUrl];
+    if (whitelist.includes(cleanOrigin) || whitelist.includes('*')) {
+      return callback(null, true);
+    }
+
+    // Allow Vercel deployment preview / production domains
+    if (cleanOrigin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
+// Root welcome route
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'TrafficSense API is running',
+    health: '/api/health',
+    version: '1.0.0',
+  });
+});
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
