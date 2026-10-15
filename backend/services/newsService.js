@@ -52,8 +52,14 @@ const KNOWN_LOCATIONS = {
       {
         name: 'Chhani Circle',
         coords: { latitude: 22.3420, longitude: 73.1910 },
-        patterns: [/chhani/i],
+        patterns: [/chhani circle/i, /\bchhani\b/i],
         bypass: { name: 'Sama-Savli Outer Bypass', coords: [22.3380, 73.2100] },
+      },
+      {
+        name: 'Bajwa-Chhani Railway Underpass',
+        coords: { latitude: 22.3490, longitude: 73.2180 },
+        patterns: [/bajwa[\s\-]*chhani/i, /chhani[\s\-]*bajwa/i, /\bbajwa\b/i],
+        bypass: { name: 'Chhani-Karelibaug Surface Road Alternate', coords: [22.3420, 73.2050] },
       },
       {
         name: 'Akota-Dandiyabazar Bridge',
@@ -86,6 +92,18 @@ const KNOWN_LOCATIONS = {
         bypass: { name: 'Camp Road Alternate Corridor', coords: [22.3350, 73.1800] },
       },
       {
+        name: 'Sama-Abacus Circle',
+        coords: { latitude: 22.3380, longitude: 73.2100 },
+        patterns: [/sama[\s\-]*abacus/i, /abacus circle/i],
+        bypass: { name: 'Chhani Road Alternate Bypass', coords: [22.3420, 73.1910] },
+      },
+      {
+        name: 'Sama-Savli Road',
+        coords: { latitude: 22.3410, longitude: 73.2150 },
+        patterns: [/sama[\s\-]*savli/i, /savli road/i],
+        bypass: { name: 'Chhani-Karelibaug Alternate Link', coords: [22.3380, 73.2050] },
+      },
+      {
         name: 'NH48 Express Highway',
         coords: { latitude: 22.3215, longitude: 73.1842 },
         patterns: [/nh48/i, /national highway 48/i, /express highway/i],
@@ -108,6 +126,84 @@ const KNOWN_LOCATIONS = {
         coords: { latitude: 22.3072, longitude: 73.1812 },
         patterns: [/navratri/i, /dussehra/i, /garba/i, /heavy vehicles? banned/i, /st buses and vehicles/i],
         bypass: { name: 'Vadodara NH48 Outer Ring Bypass (ST Bus Route)', coords: [22.3242, 73.1950] },
+      },
+      {
+        name: 'Harni Road',
+        coords: { latitude: 22.3310, longitude: 73.2260 },
+        patterns: [/\bharni\b/i],
+        bypass: { name: 'Sama-Savli Road Alternate', coords: [22.3410, 73.2150] },
+      },
+      {
+        name: 'Subhanpura Road',
+        coords: { latitude: 22.3210, longitude: 73.1550 },
+        patterns: [/subhanpura/i],
+        bypass: { name: 'Gotri Road Alternate Link', coords: [22.3142, 73.1388] },
+      },
+      {
+        name: 'Tarsali Road',
+        coords: { latitude: 22.2680, longitude: 73.2100 },
+        patterns: [/tarsali/i],
+        bypass: { name: 'Makarpura Road Connector', coords: [22.2750, 73.1900] },
+      },
+      {
+        name: 'Manjalpur Road',
+        coords: { latitude: 22.2780, longitude: 73.1950 },
+        patterns: [/manjalpur/i],
+        bypass: { name: 'Old Padra Road Alternate', coords: [22.2980, 73.1720] },
+      },
+      {
+        name: 'Makarpura GIDC Road',
+        coords: { latitude: 22.2620, longitude: 73.1700 },
+        patterns: [/makarpura/i, /gidc/i],
+        bypass: { name: 'Tarsali Bypass Corridor', coords: [22.2680, 73.2100] },
+      },
+      {
+        name: 'Panigate Area',
+        coords: { latitude: 22.3020, longitude: 73.2050 },
+        patterns: [/panigate/i],
+        bypass: { name: 'Karelibaug Alternate Link', coords: [22.3250, 73.2050] },
+      },
+      {
+        name: 'Sayajigunj Road',
+        coords: { latitude: 22.3195, longitude: 73.1830 },
+        patterns: [/sayajigunj/i],
+        bypass: { name: 'Fatehgunj Road Alternate', coords: [22.3299, 73.1857] },
+      },
+      {
+        name: 'Nizampura Road',
+        coords: { latitude: 22.3350, longitude: 73.1980 },
+        patterns: [/nizampura/i],
+        bypass: { name: 'Chhani Road Bypass', coords: [22.3420, 73.1910] },
+      },
+      {
+        name: 'Vadodara Railway Station Area',
+        coords: { latitude: 22.3119, longitude: 73.1857 },
+        patterns: [/railway station/i, /vadodara station/i, /rc dutt/i],
+        bypass: { name: 'Sayajigunj Road Alternate', coords: [22.3195, 73.1830] },
+      },
+      {
+        name: 'Ajwa Road',
+        coords: { latitude: 22.3380, longitude: 73.1650 },
+        patterns: [/\bajwa road\b/i, /ajwa circle/i],
+        bypass: { name: 'Gorwa Road Alternate', coords: [22.3142, 73.1388] },
+      },
+      {
+        name: 'Tandalja Road',
+        coords: { latitude: 22.2870, longitude: 73.1580 },
+        patterns: [/tandalja/i],
+        bypass: { name: 'Vasna Road Connector', coords: [22.2850, 73.1650] },
+      },
+      {
+        name: 'Vasna Road',
+        coords: { latitude: 22.2850, longitude: 73.1650 },
+        patterns: [/\bvasna\b/i],
+        bypass: { name: 'Tandalja Road Alternate', coords: [22.2870, 73.1580] },
+      },
+      {
+        name: 'Productivity Road',
+        coords: { latitude: 22.3100, longitude: 73.1700 },
+        patterns: [/productivity road/i, /gotri road/i],
+        bypass: { name: 'Subhanpura Link Road', coords: [22.3210, 73.1550] },
       },
     ],
   },
@@ -525,9 +621,9 @@ const extractDynamicLocation = async (text, fallbackLocation = null) => {
     };
   }
 
-  // 3. Priority 2: Extract Road Name via regex, ignoring noise words like "48-Hour", "Fake", etc.
+  // 3. Priority 2: Extract Road Name via regex (expanded suffix list includes underpass/overbridge)
   const sanitizedText = cleaned.replace(/\b\d+[\s\-]*(?:hour|hr|minute|min|day)\b/gi, '');
-  const roadMatch = sanitizedText.match(/\b([A-Z][a-zA-Z\-]*(?:\s+[A-Z][a-zA-Z\-]*){0,3}\s+(?:National Highway|State Highway|Expressway|Highway|Flyover|Bypass|Ring Road|Corridor|Road|Bridge|Tunnel|Ghat|Pass|Chowk|Circle|Junction))\b/);
+  const roadMatch = sanitizedText.match(/\b([A-Z][a-zA-Z\-]*(?:\s+[A-Z][a-zA-Z\-]*){0,4}\s+(?:National Highway|State Highway|Expressway|Highway|Flyover|Bypass|Ring Road|Corridor|Road|Bridge|Underpass|Overpass|Overbridge|Tunnel|Ghat|Pass|Chowk|Circle|Junction|Crossing|Naka))\b/);
   let roadName = roadMatch ? roadMatch[0].trim() : null;
 
   // Filter out non-road prefixes like 'Hour Highway', 'Alert Highway', etc.
@@ -536,28 +632,105 @@ const extractDynamicLocation = async (text, fallbackLocation = null) => {
     if (roadName.length < 3) roadName = null;
   }
 
-  // 4. Priority 3: Live geocoding query
-  if (roadName) {
-    try {
-      const q = `${roadName}, ${detectedCity}, India`;
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Geocode Timeout')), 2200));
-      const results = await Promise.race([geocode(q), timeoutPromise]);
-      if (results && results.length > 0) {
-        const valid = results[0];
-        return {
-          latitude: valid.latitude,
-          longitude: valid.longitude,
-          roadName: roadName,
-          locationLabel: `${roadName}, ${detectedCity}`,
-          shortName: roadName,
-          city: detectedCity,
-          bypass: null,
-        };
+  // 4. Priority 3: Smart proper-noun geocoding (Level 2 fix)
+  // Extract ALL capitalized multi-word tokens from the text as candidate place names,
+  // geocode each one, validate it is within 40km of the detected city, and use the best result.
+  // This allows ANY new/unknown place to be found automatically without a dictionary entry.
+  const cityAnchor = KNOWN_LOCATIONS[detectedCity]?.coords || { latitude: 22.3072, longitude: 73.1812 };
+  const MAX_DIST_DEG = 0.40; // ~40km radius — reject geocodes outside this range
+
+  const distanceDeg = (a, b) =>
+    Math.sqrt(Math.pow(a.latitude - b.latitude, 2) + Math.pow(a.longitude - b.longitude, 2));
+
+  // Build candidate place phrases: sequences of 1-4 capitalised words not in stopword list
+  const PLACE_STOPWORDS = new Set([
+    'The', 'A', 'An', 'In', 'On', 'At', 'By', 'Of', 'For', 'And', 'But', 'Or', 'Nor',
+    'To', 'From', 'With', 'Due', 'Was', 'Is', 'Are', 'Has', 'Had', 'Have', 'Be', 'Been',
+    'As', 'Its', 'It', 'This', 'That', 'These', 'Those', 'Which', 'Who', 'When', 'Where',
+    'Police', 'Traffic', 'Road', 'News', 'Report', 'Update', 'October', 'September',
+    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'November', 'December',
+    'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+    'Gujarati', 'Jagran', 'Published',
+    // Generic map/report/OCR words that are NOT place names:
+    'Network', 'Routing', 'Congestion', 'High', 'Low', 'Medium', 'Moderate', 'Severe',
+    'Optimal', 'Alternate', 'Estimated', 'Duration', 'Route', 'Routes',
+    'Source', 'Scanner', 'Parser', 'Program', 'Structure', 'Symbol',
+    'Analysis', 'Synthesis', 'Intermediate', 'Representation', 'Compiler', 'Tokens',
+    'Syntactic', 'Semantic', 'Generator', 'Code', 'Target', 'Machine', 'Getter',
+    'Minutes', 'Hours', 'Days', 'Alert', 'Notice', 'Advisory', 'Incident', 'Zone',
+    'Impact', 'Severity', 'Score', 'Status', 'Type', 'Level', 'Area', 'Region',
+    'Old', 'New', 'Main', 'Major', 'Minor', 'Inner', 'Outer', 'Upper', 'Lower',
+  ]);
+
+  const tokens = cleaned.split(/\s+/);
+  const candidatePhrases = [];
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = tokens[i].replace(/[^A-Za-z\-]/g, '');
+    if (!tok || !/^[A-Z]/.test(tok) || PLACE_STOPWORDS.has(tok) || tok.length < 3) continue;
+    // Build phrases of up to 4 words starting at this capitalised token
+    for (let len = 4; len >= 1; len--) {
+      const phrase = tokens.slice(i, i + len)
+        .map(t => t.replace(/[^A-Za-z\-]/g, ''))
+        .filter(Boolean)
+        .join(' ');
+      if (phrase.length >= 3 && !candidatePhrases.includes(phrase)) {
+        candidatePhrases.push(phrase);
       }
-    } catch (err) {
-      console.warn('[newsService] Fast geocode skipped:', err.message);
     }
   }
+
+  // Also include the regex-extracted road name as a high-priority candidate
+  if (roadName && !candidatePhrases.includes(roadName)) {
+    candidatePhrases.unshift(roadName);
+  }
+
+  // ── Geocoding with strict time limits ──────────────────────────────────────
+  // Max 6 candidates, 1200ms per attempt, 8s total budget.
+  // Prevents timeouts when OCR extracts many non-place words (e.g. map screenshots).
+  const MAX_CANDIDATES = 6;
+  const PER_ATTEMPT_MS = 1200;
+  const TOTAL_BUDGET_MS = 8000;
+  const geocodeStart = Date.now();
+  const topCandidates = candidatePhrases.slice(0, MAX_CANDIDATES);
+
+  for (const phrase of topCandidates) {
+    if (Date.now() - geocodeStart > TOTAL_BUDGET_MS) {
+      console.warn('[newsService] Smart geocode: total budget exhausted.');
+      break;
+    }
+    if (phrase.split(' ').every(w => PLACE_STOPWORDS.has(w))) continue;
+    try {
+      const q = `${phrase}, ${detectedCity}, India`;
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Geocode Timeout')), PER_ATTEMPT_MS)
+      );
+      const results = await Promise.race([geocode(q), timeoutPromise]);
+      if (results && results.length > 0) {
+        const geo = results[0];
+        const dist = distanceDeg(
+          { latitude: geo.latitude, longitude: geo.longitude },
+          cityAnchor
+        );
+        if (dist <= MAX_DIST_DEG) {
+          console.log(`[newsService] Smart geocode matched: "${phrase}" → (${geo.latitude}, ${geo.longitude}), dist=${dist.toFixed(3)}°`);
+          return {
+            latitude: geo.latitude,
+            longitude: geo.longitude,
+            roadName: phrase,
+            locationLabel: `${phrase}, ${detectedCity}`,
+            shortName: phrase,
+            city: detectedCity,
+            bypass: null,
+          };
+        } else {
+          console.warn(`[newsService] Geocode for "${phrase}" rejected — too far from ${detectedCity} (dist=${dist.toFixed(3)}°)`);
+        }
+      }
+    } catch (err) {
+      // Timeout or network error — try next candidate
+    }
+  }
+  // ───────────────────────────────────────────────────────────────────────────
 
   // 5. Fallback deterministic offset within the detected city
   const fallbackCoords = cityData.coords || { latitude: 22.3072, longitude: 73.1812 };
@@ -599,6 +772,34 @@ const verifyIncidentReport = async ({ title = '', text = '', location = null, im
   }
 
   const lower = fullContent.toLowerCase();
+
+  // ── RELEVANCE GATE ──────────────────────────────────────────────────────────
+  // If the text contains ZERO traffic / road / transport related keywords,
+  // reject it immediately. This prevents compiler diagrams, recipes, random
+  // OCR noise, etc. from ever being shown as a fake "Central Corridor" incident.
+  const TRAFFIC_KEYWORDS = [
+    'road', 'highway', 'traffic', 'accident', 'crash', 'collision', 'vehicle',
+    'diversion', 'closure', 'construction', 'flyover', 'bridge', 'underpass',
+    'overpass', 'bypass', 'jam', 'flood', 'waterlog', 'railway', 'bus', 'truck',
+    'commute', 'transport', 'police', 'lane', 'signal', 'junction', 'circle',
+    'naka', 'chowk', 'corridor', 'expressway', 'pothole', 'repair', 'blockade',
+    'curfew', 'protest', 'barricade', 'route', 'detour', 'diverted', 'diverts',
+    'congestion', 'motorist', 'commuter', 'travell', 'navratri', 'dussehra',
+  ];
+  const hasTrafficContext = TRAFFIC_KEYWORDS.some(kw => lower.includes(kw));
+
+  if (!hasTrafficContext) {
+    return {
+      isReal: false,
+      credibilityScore: 0,
+      verdict: 'NOT_TRAFFIC_RELATED',
+      title: title || 'Non-Traffic Content',
+      explanation: 'The uploaded content does not appear to be a traffic or road incident report. Please upload a news article, road notice, or incident report related to traffic conditions.',
+      toastType: 'warning',
+      toastMessage: '⚠️ Not a traffic report. Please paste road/traffic related news.',
+    };
+  }
+  // ────────────────────────────────────────────────────────────────────────────
 
   // 1. Comprehensive Fake / Hoax / Debunked Rumor Detection Patterns
   const FAKE_PATTERNS = [
@@ -763,7 +964,7 @@ const verifyIncidentReport = async ({ title = '', text = '', location = null, im
   let trafficImpact = 55;
   let statusColor = '#f59e0b';
 
-  const isFestivalOrBan = /navratri|dussehra|festival|garba|heavy vehicles? banned|vehicle ban|traffic diversion|alternate routes? for st/i.test(fullContent);
+  const isFestivalOrBan = /navratri|dussehra|festival|garba|heavy vehicles? banned|vehicle ban|alternate routes? for st/i.test(fullContent);
   const isPositiveAdvisory = !isFestivalOrBan && /signal synchronization|adaptive traffic signal|launches|inaugurated|100% normal|zero delays|cleared by heavy recovery|smooth high-speed transit/i.test(fullContent);
 
   if (isFestivalOrBan) {
@@ -781,21 +982,22 @@ const verifyIncidentReport = async ({ title = '', text = '', location = null, im
     severity = 'high';
     trafficImpact = Math.floor(82 + Math.random() * 12);
     statusColor = '#ef4444';
+  } else if (/construction|roadwork|repair|resurfacing|metro|bullet train|railway infrastructure|underpass.*clos|clos.*underpass/i.test(fullContent)) {
+    // Construction check runs BEFORE flooding so "construction work" news is never misclassified as flooding
+    detectedType = 'construction';
+    severity = 'moderate';
+    trafficImpact = 50;
+    statusColor = '#f59e0b';
+  } else if (/closure|closed|blocked|barricade|shut|protest|curfew/i.test(fullContent)) {
+    detectedType = 'road_closure';
+    severity = 'high';
+    trafficImpact = 90;
+    statusColor = '#dc2626';
   } else if (/flood|waterlogg|water logging|submerged|rain/i.test(fullContent)) {
     detectedType = 'flooding';
     severity = 'high';
     trafficImpact = 78;
     statusColor = '#06b6d4';
-  } else if (/closure|blocked|barricade|shut|protest|curfew/i.test(fullContent)) {
-    detectedType = 'road_closure';
-    severity = 'high';
-    trafficImpact = 90;
-    statusColor = '#dc2626';
-  } else if (/construction|roadwork|repair|resurfacing|metro/i.test(fullContent)) {
-    detectedType = 'construction';
-    severity = 'moderate';
-    trafficImpact = 50;
-    statusColor = '#f59e0b';
   } else if (lower.includes('severe') || lower.includes('major') || lower.includes('died') || lower.includes('injured')) {
     severity = 'high';
     trafficImpact = 85;
@@ -811,13 +1013,13 @@ const verifyIncidentReport = async ({ title = '', text = '', location = null, im
     center: [centerLat, centerLng],
     radius: severity === 'high' ? 1400 : 1000,
     name: isFestivalOrBan
-      ? `${displayEntity} — Heavy Vehicle Ban (Navratri / Dussehra)`
+      ? `${displayEntity} — Festival Traffic Restriction`
       : `${displayEntity} — ${detectedType.toUpperCase().replace('_', ' ')} Zone`,
     severity,
     impact: trafficImpact,
     color: statusColor,
     description: isFestivalOrBan
-      ? `Police traffic restriction: Heavy vehicles prohibited in Vadodara city limits from 11th to 19th Oct (till 2 AM) for Navratri and Dussehra celebrations. Commuters advised to use designated ring bypass.`
+      ? `Police traffic restriction active near ${displayEntity}. Certain vehicle categories prohibited. Commuters advised to use designated bypass corridors.`
       : isPositiveAdvisory
       ? `Free-flowing corridor on ${displayEntity}. Adaptive signals and smooth transit confirmed.`
       : `Active ${detectedType.replace('_', ' ')} reported on ${displayEntity}. Expect ~${Math.round(trafficImpact / 2.5)} min delay.`,
@@ -834,18 +1036,18 @@ const verifyIncidentReport = async ({ title = '', text = '', location = null, im
       radius: 1500,
       name: bypassInfo.name,
       status: isFestivalOrBan
-        ? 'Designated Free-Flow ST Bus & Heavy Vehicle Bypass Corridor'
+        ? 'Designated Free-Flow Bypass Corridor'
         : 'Optimal Free-Flow Highway Bypass (Speed: 55 km/h)',
       color: '#10b981',
       description: isFestivalOrBan
-        ? 'Official police diversion corridor bypassing central city Navratri restrictions for ST buses & commercial transit.'
+        ? `Official diversion corridor bypassing ${displayEntity} festival restrictions.`
         : `Verified safe alternative corridor bypassing central ${displayEntity} delays.`,
     },
   ];
 
   let toastMsg = `✅ Verified Real Incident: ${displayEntity} (${severity} impact). Safe bypass map updated.`;
   if (isFestivalOrBan) {
-    toastMsg = `✅ Verified Traffic Notice: Vadodara Navratri Heavy Vehicle Ban (11th-19th Oct). Alternate detour active.`;
+    toastMsg = `✅ Verified Traffic Notice: Festival Restriction near ${displayEntity}. Alternate detour active.`;
   } else if (isPositiveAdvisory) {
     toastMsg = `✅ Verified Traffic Advisory: ${displayEntity} (smooth flow). Corridors running optimally.`;
   } else if (detectedType === 'accident') {
@@ -859,7 +1061,7 @@ const verifyIncidentReport = async ({ title = '', text = '', location = null, im
   }
 
   const explanation = isFestivalOrBan
-    ? `Factual roadway traffic regulation verified with high confidence (${credibilityScore}%). Police restriction active for Navratri and Dussehra in Vadodara: heavy vehicles banned from 11th to 19th October (till 2 AM). ST buses and commercial transit diverted to NH48 Outer Ring Bypass.`
+    ? `Factual roadway traffic regulation verified with high confidence (${credibilityScore}%). Festival-related vehicle restrictions active near ${displayEntity}. Commuters advised to use designated bypass corridors.`
     : isPositiveAdvisory
     ? `Factual transit update verified with high confidence (${credibilityScore}%). Infrastructure fully operational with free-flow corridor movement.`
     : `Factual roadway incident verified with high confidence (${credibilityScore}%). Extracted location: ${displayEntity} (${locationLabel}). Alternate bypass established.`;

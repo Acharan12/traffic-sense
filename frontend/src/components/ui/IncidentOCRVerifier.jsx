@@ -394,6 +394,8 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
                   ? 'notion-pill-green'
                   : verificationResult.verdict === 'UNVERIFIED_RUMOR'
                   ? 'notion-pill-yellow'
+                  : verificationResult.verdict === 'NOT_TRAFFIC_RELATED'
+                  ? 'notion-pill-gray'
                   : 'notion-pill-red'
               }`}
             >
@@ -401,12 +403,28 @@ export default function IncidentOCRVerifier({ onIncidentVerified, selectedArticl
                 ? '● VERIFIED REAL INCIDENT'
                 : verificationResult.verdict === 'UNVERIFIED_RUMOR'
                 ? '⚠️ UNVERIFIED VIRAL CLAIM'
+                : verificationResult.verdict === 'NOT_TRAFFIC_RELATED'
+                ? '○ NOT TRAFFIC RELATED'
                 : '● FAKE / HOAX REPORT'}
             </span>
           </div>
 
-          {/* If Fake or Unverified */}
-          {!verificationResult.isReal ? (
+          {/* NOT TRAFFIC RELATED */}
+          {verificationResult.verdict === 'NOT_TRAFFIC_RELATED' ? (
+            <div className="p-4 rounded-md border border-notion-border bg-notion-sidebar space-y-2 text-xs">
+              <div className="flex items-center gap-2 font-bold text-sm text-notion-heading">
+                <AlertTriangle size={18} className="text-notion-dim flex-shrink-0" />
+                <span>Content Not Recognised as a Traffic Report</span>
+              </div>
+              <p className="text-notion-dim leading-relaxed">
+                {verificationResult.explanation}
+              </p>
+              <div className="pt-1 flex items-center gap-2">
+                <span className="notion-pill notion-pill-gray text-[10px]">No map data generated</span>
+                <span className="notion-pill notion-pill-gray text-[10px]">Upload road/traffic news to analyse</span>
+              </div>
+            </div>
+          ) : !verificationResult.isReal ? (
             <div
               className={`${
                 verificationResult.verdict === 'UNVERIFIED_RUMOR'
