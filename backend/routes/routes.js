@@ -1,15 +1,18 @@
 const express = require('express');
 const { calculateRoutes, getRouteHistory } = require('../controllers/routesController');
-const { protect, optionalAuth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const { routeLimiter } = require('../middleware/rateLimiter');
 const { geocode, reverseGeocode } = require('../services/geocodingService');
 
 const router = express.Router();
 
-router.post('/calculate', routeLimiter, optionalAuth, calculateRoutes);
-router.get('/history', optionalAuth, getRouteHistory);
+// All route-planning endpoints require authentication
+router.use(protect);
 
-// Geocoding endpoints
+router.post('/calculate', routeLimiter, calculateRoutes);
+router.get('/history', getRouteHistory);
+
+// Geocoding endpoints (still require auth)
 router.get('/geocode', async (req, res, next) => {
   try {
     const { q } = req.query;

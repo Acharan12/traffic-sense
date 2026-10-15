@@ -17,10 +17,14 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRE
-        value: 7d
+        value: 8h
       - key: MONGODB_URI
         sync: false
       - key: FRONTEND_URL
         sync: false
       - key: ALLOWED_ORIGINS
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: SEED_USER_PASSWORD
         sync: false

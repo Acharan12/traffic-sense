@@ -24,9 +24,19 @@ const seed = async () => {
     console.log('🗑️  Cleared existing data');
 
     // --- USERS ---
-    // IMPORTANT: Change admin credentials before production!
-    const adminPass = await bcrypt.hash('Admin@123', 12);
-    const userPass = await bcrypt.hash('User@123', 12);
+    // SECURITY: Set SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD in your .env before seeding.
+    // Never use default passwords in production.
+    const adminRawPass = process.env.SEED_ADMIN_PASSWORD;
+    const userRawPass = process.env.SEED_USER_PASSWORD;
+
+    if (!adminRawPass || !userRawPass) {
+      console.error('\n❌  SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD must be set in .env before seeding.');
+      console.error('   Example: SEED_ADMIN_PASSWORD=MyStr0ng!Pass SEED_USER_PASSWORD=Us3rStr0ng!Pass');
+      process.exit(1);
+    }
+
+    const adminPass = await bcrypt.hash(adminRawPass, 12);
+    const userPass = await bcrypt.hash(userRawPass, 12);
 
     const users = await User.insertMany([
       { name: 'Admin User', email: 'admin@trafficsense.com', password: adminPass, role: 'admin' },
@@ -36,8 +46,8 @@ const seed = async () => {
       { name: 'Rahul Kumar', email: 'rahul@example.com', password: userPass, role: 'user' },
     ]);
     console.log(`✅ Created ${users.length} users`);
-    console.log('   📧 Admin: admin@trafficsense.com / Admin@123');
-    console.log('   📧 Demo:  demo@trafficsense.com  / User@123');
+    console.log('   Admin: admin@trafficsense.com (password from SEED_ADMIN_PASSWORD)');
+    console.log('   Demo:  demo@trafficsense.com  (password from SEED_USER_PASSWORD)');
 
     // --- TRAFFIC INCIDENTS ---
     const incidents = await TrafficIncident.insertMany([

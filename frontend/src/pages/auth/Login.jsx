@@ -1,42 +1,38 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, Lock, Loader2, AlertCircle, Sparkles, Shield, User } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const { login, loading } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const result = await login(form.email, form.password);
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.message || 'Invalid email or password');
-    }
-  };
 
-  const fillAndSubmit = async (email, password) => {
-    setForm({ email, password });
-    setError('');
-    const result = await login(email, password);
+    if (!form.email.trim() || !form.password) {
+      setError('Email and password are required.');
+      return;
+    }
+
+    const result = await login(form.email.trim(), form.password);
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     } else {
-      setError(result.message || 'Login failed');
+      setError(result.message || 'Invalid email or password.');
     }
   };
 
   return (
     <div className="min-h-screen bg-notion-bg flex items-center justify-center p-4 font-sans text-notion-text transition-colors">
       <div className="w-full max-w-sm space-y-6">
-        {/* Header Block */}
+        {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-xl bg-notion-card border border-notion-border flex items-center justify-center text-2xl shadow-sm mx-auto select-none">
             🚦
@@ -49,7 +45,7 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Card Box */}
+        {/* Card */}
         <div className="notion-card p-6 space-y-4 shadow-sm">
           {error && (
             <div className="notion-callout-red text-xs">
@@ -58,58 +54,59 @@ export default function Login() {
             </div>
           )}
 
-          {/* Quick Demo Fill Badges */}
-          <div className="space-y-1.5 pb-2 border-b border-notion-border">
-            <span className="text-[10px] text-notion-dim font-mono uppercase tracking-wider block">
-              1-Click Quick Login:
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => fillAndSubmit('admin@trafficsense.com', 'Admin@123')}
-                className="btn-notion-secondary py-1.5 px-2 text-xs flex items-center justify-center gap-1.5 font-semibold"
-              >
-                <Shield size={12} className="text-purple-500" />
-                <span>Admin Login</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => fillAndSubmit('demo@trafficsense.com', 'User@123')}
-                className="btn-notion-secondary py-1.5 px-2 text-xs flex items-center justify-center gap-1.5 font-semibold"
-              >
-                <User size={12} className="text-blue-500" />
-                <span>Demo User</span>
-              </button>
+          <form onSubmit={handleSubmit} className="space-y-3 text-xs" noValidate>
+            {/* Email */}
+            <div>
+              <label htmlFor="login-email" className="text-[11px] text-notion-dim block mb-1">
+                Email address
+              </label>
+              <div className="relative">
+                <Mail size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-notion-dim pointer-events-none" />
+                <input
+                  id="login-email"
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                  className="notion-input pl-7"
+                />
+              </div>
             </div>
-          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+            {/* Password */}
             <div>
-              <label className="text-[11px] text-notion-dim block mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="admin@trafficsense.com"
-                required
-                className="notion-input"
-              />
-            </div>
-            <div>
-              <label className="text-[11px] text-notion-dim block mb-1">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="notion-input"
-              />
+              <label htmlFor="login-password" className="text-[11px] text-notion-dim block mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <Lock size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-notion-dim pointer-events-none" />
+                <input
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  className="notion-input pl-7 pr-8"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-notion-dim hover:text-notion-text transition-colors"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={12} /> : <Eye size={12} />}
+                </button>
+              </div>
             </div>
 
             <button
+              id="login-submit-btn"
               type="submit"
               disabled={loading}
               className="btn-notion-primary w-full justify-center py-2 text-xs font-semibold mt-1"
@@ -119,7 +116,7 @@ export default function Login() {
                   <Loader2 size={13} className="animate-spin" /> Signing in...
                 </>
               ) : (
-                'Continue with Email'
+                'Sign In'
               )}
             </button>
           </form>
@@ -131,6 +128,10 @@ export default function Login() {
             </Link>
           </p>
         </div>
+
+        <p className="text-center text-[11px] text-notion-dim">
+          By signing in, you agree to keep your credentials secure and not share them with others.
+        </p>
       </div>
     </div>
   );

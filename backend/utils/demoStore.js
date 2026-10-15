@@ -7,8 +7,18 @@ class DemoStore {
   }
 
   async init() {
-    const adminPass = await bcrypt.hash('Admin@123', 10);
-    const userPass = await bcrypt.hash('User@123', 10);
+    // Use env-configured passwords for the fallback in-memory store.
+    // SEED_ADMIN_PASSWORD / SEED_USER_PASSWORD must be set in .env for this to work.
+    const adminRaw = process.env.SEED_ADMIN_PASSWORD || null;
+    const userRaw = process.env.SEED_USER_PASSWORD || null;
+
+    if (!adminRaw || !userRaw) {
+      console.warn('⚠️  SEED_ADMIN_PASSWORD / SEED_USER_PASSWORD not set — in-memory accounts will require registration.');
+    }
+
+    // Hash whatever was provided (or a random string so the account becomes inaccessible)
+    const adminPass = await bcrypt.hash(adminRaw || Math.random().toString(36), 12);
+    const userPass = await bcrypt.hash(userRaw || Math.random().toString(36), 12);
 
     this.users = [
       {
@@ -306,12 +316,19 @@ class DemoStore {
     }));
   }
 
-  getUserByEmail(email) {
+  findUserByEmail(email) {
     return this.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
   }
 
-  getUserById(id) {
+  findUserById(id) {
     return this.users.find((u) => u._id === id);
+  }
+
+  updateUser(id, data) {
+    const idx = this.users.findIndex((u) => u._id === id);
+    if (idx === -1) return null;
+    this.users[idx] = { ...this.users[idx], ...data };
+    return this.users[idx];
   }
 
   createUser({ name, email, password, role = 'user' }) {

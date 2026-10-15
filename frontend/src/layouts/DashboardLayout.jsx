@@ -123,8 +123,8 @@ export default function DashboardLayout() {
             </span>
           </button>
 
-          {/* User Row or Sign In Button */}
-          {user ? (
+          {/* User Row */}
+          {user && (
             <div className="flex items-center justify-between p-1.5 rounded hover:bg-notion-hover transition-colors text-xs">
               <div
                 onClick={() => navigate('/profile')}
@@ -146,13 +146,6 @@ export default function DashboardLayout() {
                 <LogOut size={12} />
               </button>
             </div>
-          ) : (
-            <button
-              onClick={() => navigate('/login')}
-              className="btn-notion-primary w-full justify-center py-1.5 text-xs font-semibold"
-            >
-              Sign In
-            </button>
           )}
         </div>
       </aside>

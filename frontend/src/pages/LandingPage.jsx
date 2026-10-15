@@ -15,25 +15,21 @@ export default function LandingPage() {
       icon: '📍',
       title: 'OSRM Route Optimizer',
       desc: 'Real turn-by-turn road curves with turn penalties, detour generation, and travel time scoring.',
-      path: '/route-planner',
     },
     {
       icon: '📰',
       title: 'News & OCR Fact-Checker',
       desc: 'Tesseract.js OCR image parsing with AI credibility scoring to classify Real vs. Fake reports.',
-      path: '/news',
     },
     {
       icon: '🧠',
       title: 'Random Forest AI Predictor',
       desc: 'Trained ML model predicting congestion severity with weather, hour, and road-type inputs.',
-      path: '/predict',
     },
     {
       icon: '🗺️',
       title: 'Live Traffic & Hazard Database',
       desc: 'Real-world incident tracker with automatic traffic impact and safe bypass corridor mapping.',
-      path: '/traffic-map',
     },
   ];
 
@@ -65,10 +61,10 @@ export default function LandingPage() {
               Sign in
             </button>
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/login')}
               className="btn-notion-primary text-xs py-1 px-3"
             >
-              Open Workspace
+              Get Started
             </button>
           </div>
         </div>
@@ -90,17 +86,17 @@ export default function LandingPage() {
             </p>
             <div className="flex items-center gap-2.5 pt-2">
               <button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/login')}
                 className="btn-notion-primary py-2 px-4 text-xs font-semibold"
               >
-                <span>Launch App</span>
+                <span>Get Started</span>
                 <ArrowRight size={12} />
               </button>
               <button
-                onClick={() => navigate('/route-planner')}
+                onClick={() => navigate('/login')}
                 className="btn-notion-secondary py-2 px-3 text-xs"
               >
-                Try Route Planner
+                Sign In
               </button>
             </div>
           </div>
@@ -121,7 +117,7 @@ export default function LandingPage() {
             {FEATURES.map((f, i) => (
               <div
                 key={i}
-                onClick={() => navigate(f.path)}
+                onClick={() => navigate('/login')}
                 className="notion-card p-4 space-y-2 cursor-pointer hover:border-neutral-400 dark:hover:border-neutral-600 transition-all group"
               >
                 <div className="flex items-center justify-between">

@@ -1,11 +1,14 @@
 const express = require('express');
 const { makePrediction, getPredictionHistory, getAnalytics } = require('../controllers/predictionsController');
-const { optionalAuth, protect } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.post('/predict', optionalAuth, makePrediction);
-router.get('/history', protect, getPredictionHistory);
+// All prediction routes require authentication
+router.use(protect);
+
+router.post('/predict', makePrediction);
+router.get('/history', getPredictionHistory);
 router.get('/analytics', getAnalytics);
 
 module.exports = router;
